@@ -1,8 +1,8 @@
-// pages/CartPage.js
-import React from 'react';
+import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { removeFromCart, clearCart } from '../features/cart/cartSlice';
 import { Table, Button } from 'react-bootstrap';
+import PaymentModal from '../components/payment/PaymentModal';
 
 const CartPage = () => {
   const dispatch = useDispatch();
@@ -14,6 +14,24 @@ const CartPage = () => {
 
   const handleClear = () => {
     dispatch(clearCart());
+  };
+
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+
+  const handleShowPaymentModal = () => setShowPaymentModal(true);
+  const handleClosePaymentModal = () => setShowPaymentModal(false);
+
+  const calculateTotal = () => {
+    return cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+  };
+
+  const totalAmount = calculateTotal();
+  const baseFee = 5.00;
+  const deliveryFee = 10.00;
+
+  const handlePayment = (paymentInfo) => {
+    console.log('Payment info:', paymentInfo);
+    // Aquí puedes manejar el pago, como enviar la información al backend
   };
 
   return (
@@ -29,25 +47,35 @@ const CartPage = () => {
           </tr>
         </thead>
         <tbody>
-          {cart.length === 0 ? (
-            <tr>
-              <td colSpan="4">No items in the cart.</td>
+          {cart.map(item => (
+            <tr key={item.id}>
+              <td>{item.title}</td>
+              <td>{item.quantity}</td>
+              <td>${item.price}</td>
+              <td>
+                <Button variant="danger" onClick={() => handleRemove(item.id)}>Remove</Button>
+              </td>
             </tr>
-          ) : (
-            cart.map(item => (
-              <tr key={item.id}>
-                <td>{item.name}</td>
-                <td>{item.quantity}</td>
-                <td>${item.price}</td>
-                <td>
-                  <Button variant="danger" onClick={() => handleRemove(item.id)}>Remove</Button>
-                </td>
-              </tr>
-            ))
-          )}
+          ))}
         </tbody>
       </Table>
       <Button variant="warning" onClick={handleClear}>Clear Cart</Button>
+      <div>
+        <h4>Payment Summary</h4>
+        <p>Product Amount: ${totalAmount.toFixed(2)}</p>
+        <p>Base Fee: ${baseFee.toFixed(2)}</p>
+        <p>Delivery Fee: ${deliveryFee.toFixed(2)}</p>
+        <p>Total: ${(totalAmount + baseFee + deliveryFee).toFixed(2)}</p>
+        <Button variant="primary" onClick={handleShowPaymentModal}>Proceed to Payment</Button>
+      </div>
+      <PaymentModal
+        show={showPaymentModal}
+        handleClose={handleClosePaymentModal}
+        handlePayment={handlePayment}
+        totalAmount={totalAmount}
+        baseFee={baseFee}
+        deliveryFee={deliveryFee}
+      />
     </div>
   );
 };

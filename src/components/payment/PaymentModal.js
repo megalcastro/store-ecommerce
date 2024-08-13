@@ -1,82 +1,120 @@
 import React, { useState } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
-import { useDispatch } from 'react-redux';
-import { clearCart } from '../../features/cart/cartSlice'; // Asegúrate de importar la acción correcta
 
-const PaymentModal = ({ show, handleClose, handlePayment, cartItem }) => {
-  const [paymentInfo, setPaymentInfo] = useState({
-    cardNumber: '',
-    expirationDate: '',
-    cvv: '',
-    deliveryAddress: '',
-  });
-  const dispatch = useDispatch();
+const PaymentModal = ({ show, handleClose, handlePayment, totalAmount, baseFee, deliveryFee }) => {
+  const [cardNumber, setCardNumber] = useState('');
+  const [expiryDate, setExpiryDate] = useState('');
+  const [cvv, setCvv] = useState('');
+  const [deliveryAddress, setDeliveryAddress] = useState('');
+  const [cardType, setCardType] = useState('');
 
-  const handleChange = (e) => {
-    setPaymentInfo({ ...paymentInfo, [e.target.name]: e.target.value });
+  const validateCardNumber = (number) => {
+    const visaRegex = /^4[0-9]{12}(?:[0-9]{3})?$/; // Visa cards start with 4
+    const masterCardRegex = /^5[1-5][0-9]{14}$/; // MasterCard cards start with 51-55
+
+    if (visaRegex.test(number)) {
+      setCardType('Visa');
+    } else if (masterCardRegex.test(number)) {
+      setCardType('MasterCard');
+    } else {
+      setCardType('');
+    }
+  };
+
+  const handleCardNumberChange = (e) => {
+    const number = e.target.value;
+    setCardNumber(number);
+    validateCardNumber(number);
   };
 
   const handleSubmit = () => {
+    const paymentInfo = {
+      cardNumber,
+      expiryDate,
+      cvv,
+      deliveryAddress,
+    };
+
     handlePayment(paymentInfo);
-    dispatch(clearCart()); // Limpiar el carrito después del pago
     handleClose();
   };
 
   return (
     <Modal show={show} onHide={handleClose}>
       <Modal.Header closeButton>
-        <Modal.Title>Payment Information</Modal.Title>
+        <Modal.Title>Enter Credit Card Information</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <Form>
-          <Form.Group controlId="formCardNumber">
+          <Form.Group>
             <Form.Label>Card Number</Form.Label>
             <Form.Control
               type="text"
-              name="cardNumber"
-              value={paymentInfo.cardNumber}
-              onChange={handleChange}
-              placeholder="Enter card number"
+              placeholder="Enter your card number"
+              value={cardNumber}
+              onChange={handleCardNumberChange}
+              maxLength="19" // Limit length to 19 characters (including spaces)
             />
+            {cardType && (
+              <div className="mt-2">
+                <img
+                  src={
+                    cardType === 'Visa'
+                      ? 'https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg'
+                      : 'https://upload.wikimedia.org/wikipedia/commons/a/a4/Mastercard_2019_logo.svg'
+                  }
+                  alt={cardType}
+                  style={{ height: '30px', marginTop: '10px' }}
+                />
+              </div>
+            )}
           </Form.Group>
-          <Form.Group controlId="formExpirationDate">
-            <Form.Label>Expiration Date</Form.Label>
+
+          <Form.Group>
+            <Form.Label>Expiry Date</Form.Label>
             <Form.Control
               type="text"
-              name="expirationDate"
-              value={paymentInfo.expirationDate}
-              onChange={handleChange}
               placeholder="MM/YY"
+              value={expiryDate}
+              onChange={(e) => setExpiryDate(e.target.value)}
+              maxLength="5" // Limit length to "MM/YY"
             />
           </Form.Group>
-          <Form.Group controlId="formCvv">
+
+          <Form.Group>
             <Form.Label>CVV</Form.Label>
             <Form.Control
               type="text"
-              name="cvv"
-              value={paymentInfo.cvv}
-              onChange={handleChange}
               placeholder="Enter CVV"
+              value={cvv}
+              onChange={(e) => setCvv(e.target.value)}
+              maxLength="4" // Limit length to 3 or 4 characters
             />
           </Form.Group>
-          <Form.Group controlId="formDeliveryAddress">
+
+          <Form.Group>
             <Form.Label>Delivery Address</Form.Label>
             <Form.Control
               type="text"
-              name="deliveryAddress"
-              value={paymentInfo.deliveryAddress}
-              onChange={handleChange}
               placeholder="Enter delivery address"
+              value={deliveryAddress}
+              onChange={(e) => setDeliveryAddress(e.target.value)}
             />
           </Form.Group>
+
+          <h4>Payment Summary</h4>
+          <p>Product Amount: ${totalAmount}</p>
+          <p>Base Fee: ${baseFee}</p>
+          <p>Delivery Fee: ${deliveryFee}</p>
+          <p>Total: ${(totalAmount + baseFee + deliveryFee).toFixed(2)}</p>
         </Form>
       </Modal.Body>
       <Modal.Footer>
         <Button variant="secondary" onClick={handleClose}>
-          Close
+          Cancel
         </Button>
         <Button variant="primary" onClick={handleSubmit}>
-          Pay Now
+          Pay
         </Button>
       </Modal.Footer>
     </Modal>
