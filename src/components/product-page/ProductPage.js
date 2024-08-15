@@ -9,7 +9,7 @@ const ProductPage = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get('https://fakestoreapi.com/products'); // Ajusta la URL según tu backend
+        const response = await axios.get('http://localhost:3000/products'); // Ajusta la URL según tu backend
         setProducts(response.data);
       } catch (error) {
         console.error('Error fetching products:', error);
