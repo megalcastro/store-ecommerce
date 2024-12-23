@@ -1,0 +1,22 @@
+.product-page-container {
+    padding: 20px;
+    background: linear-gradient(to bottom, #ffffff, #f8f9fa);
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  h1 {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 700;
+    color: #343a40;
+  }
+  
+  .product-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+  }
+  

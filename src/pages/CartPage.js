@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { removeFromCart, clearCart } from '../features/cart/cartSlice';
-import { Table, Button } from 'react-bootstrap';
+import { Table, Button, Card, Row, Col, Alert } from 'react-bootstrap';
 import PaymentModal from '../components/payment/PaymentModal';
 
 const CartPage = () => {
@@ -35,39 +35,76 @@ const CartPage = () => {
   };
 
   return (
-    <div>
-      <h1>Your Cart</h1>
-      <Table striped bordered hover>
-        <thead>
-          <tr>
-            <th>Product</th>
-            <th>Quantity</th>
-            <th>Price</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {cart.map(item => (
-            <tr key={item.id}>
-              <td>{item.title}</td>
-              <td>{item.quantity}</td>
-              <td>${item.price}</td>
-              <td>
-                <Button variant="danger" onClick={() => handleRemove(item.id)}>Remove</Button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
-      <Button variant="warning" onClick={handleClear}>Clear Cart</Button>
-      <div>
-        <h4>Payment Summary</h4>
-        <p>Product Amount: ${totalAmount.toFixed(2)}</p>
-        <p>Base Fee: ${baseFee.toFixed(2)}</p>
-        <p>Delivery Fee: ${deliveryFee.toFixed(2)}</p>
-        <p>Total: ${(totalAmount + baseFee + deliveryFee).toFixed(2)}</p>
-        <Button variant="primary" onClick={handleShowPaymentModal}>Proceed to Payment</Button>
-      </div>
+    <div className="cart-page">
+      <h1 className="text-center mb-4">Your Cart</h1>
+
+      {/* Cart Table */}
+      <Card className="mb-4">
+        <Card.Body>
+          <Table striped bordered hover responsive>
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {cart.length === 0 ? (
+                <tr>
+                  <td colSpan="4" className="text-center">Your cart is empty!</td>
+                </tr>
+              ) : (
+                cart.map(item => (
+                  <tr key={item.id}>
+                    <td>{item.title}</td>
+                    <td>{item.quantity}</td>
+                    <td>${parseFloat(item.price).toFixed(2)}</td>
+                    <td>
+                      <Button variant="danger" onClick={() => handleRemove(item.id)}>Remove</Button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </Table>
+        </Card.Body>
+      </Card>
+
+      {/* Clear Cart Button */}
+      {cart.length > 0 && (
+        <div className="d-flex justify-content-end mb-4">
+          <Button variant="warning" onClick={handleClear}>Clear Cart</Button>
+        </div>
+      )}
+
+      {/* Payment Summary */}
+      <Card>
+        <Card.Body>
+          <h4>Payment Summary</h4>
+          <Row>
+            <Col xs={6}>Product Amount:</Col>
+            <Col xs={6} className="text-right">${totalAmount.toFixed(2)}</Col>
+          </Row>
+          <Row>
+            <Col xs={6}>Base Fee:</Col>
+            <Col xs={6} className="text-right">${baseFee.toFixed(2)}</Col>
+          </Row>
+          <Row>
+            <Col xs={6}>Delivery Fee:</Col>
+            <Col xs={6} className="text-right">${deliveryFee.toFixed(2)}</Col>
+          </Row>
+          <hr />
+          <Row>
+            <Col xs={6}><strong>Total:</strong></Col>
+            <Col xs={6} className="text-right"><strong>${(totalAmount + baseFee + deliveryFee).toFixed(2)}</strong></Col>
+          </Row>
+          <Button variant="primary" onClick={handleShowPaymentModal} className="w-100 mt-3">Proceed to Payment</Button>
+        </Card.Body>
+      </Card>
+
+      {/* Payment Modal */}
       <PaymentModal
         show={showPaymentModal}
         handleClose={handleClosePaymentModal}
@@ -76,6 +113,13 @@ const CartPage = () => {
         baseFee={baseFee}
         deliveryFee={deliveryFee}
       />
+      
+      {/* Success Alert if cart is empty */}
+      {cart.length === 0 && (
+        <Alert variant="info" className="mt-4">
+          Don't forget to check out our products and add them to your cart!
+        </Alert>
+      )}
     </div>
   );
 };
